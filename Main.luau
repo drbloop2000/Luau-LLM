@@ -4,13 +4,13 @@
 const model: any = require("./Model");
 const process: any = require("@lute/process") :: any;
 const read_stdin = function(): string
-	const args: {[number]: string} = process.args;
-	const argv: number = #args;
+	const argv: {[number]: string} = process.args;
+	const argc: number = #argv;
 	--print(argv);
-	if (argv < 2) then
+	if (argc < 2) then
 		return nil :: never;
 	end;
-	const out = table.concat(args, " ", 2) :: any;
+	const out = table.concat(argv, " ", 2) :: any;
 	return out;
 end;
 const prompt: string? = read_stdin();

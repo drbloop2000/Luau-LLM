@@ -1,10 +1,10 @@
 --!strict
 --!native
 --!optimize 2
-local model: any = require("./Model");
-local process: any = require("@lute/process") :: any;
+const model: any = require("./Model");
+const process: any = require("@lute/process") :: any;
 const read_stdin = function(): string
-	local args: {string} = process.args;
+	const args: {[number]: string} = process.args;
 	const argv: number = #args;
 	--print(argv);
 	if (argv < 2) then

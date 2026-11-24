@@ -3,3 +3,6 @@ The First Generation of the Luau Language Model, trained in about 13 hours on a 
 
 Use:
 ./Model.exe [prompt]
+
+
+made and compiled with the lute runtime :^)

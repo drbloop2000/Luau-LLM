@@ -9,6 +9,7 @@ const memcpy: (buffer, number, buffer, number?, number?) -> () = memory.copy;
 const memset: (buffer, number, number, number?) -> () = memory.fill;
 const calloc: (number) -> buffer = memory.create;
 const malloc: (number, any) -> any = table.create;
+const strlen: (string) -> number = string.len;
 const matrix_vector_mul = @[native, checked] function(operand_buffer: buffer, y0: number, w: buffer, w0: number, x: buffer, x0: number, n: number, k: number): ()
 	const rs: number = k * 4;
 	for i: number = 0, n - 1, 8 do
@@ -49,9 +50,9 @@ const main = @[native, checked] function(data_buffer: buffer, prompt: string, co
 	local handle: any = fs.open("data/tokenizer.bin", "r");
 	const tokenizer: buffer = memory.fromstring(fs.read(handle));
 	fs.close(handle);
-	const r: buffer = calloc(2097152);
+	local r: buffer = calloc(2097152);
 	memset(r, 0, 0xFF);
-	const token_text: {[number]: string} = malloc(1024);
+	local token_text: {[number]: string} = malloc(1024);
 	for i: number = 0, 255 do
 		token_text[i + 1] = string.char(i);
 	end;
@@ -61,13 +62,13 @@ const main = @[native, checked] function(data_buffer: buffer, prompt: string, co
 		token_text[i + 1] = `{token_text[bit32.band(pair_uint32, 0xFFFF) + 1]}{token_text[bit32.rshift(pair_uint32, 16) + 1]}`;
 	end;
 	const text: string = `\n{prompt:gsub("[^\n\32-\126]", ""):gsub(" +", " "):gsub(" ?\n ?", "\n"):gsub("^ ", ""):gsub(" $", "")}`;
-	const n: number = #text;
-	const src: buffer = memory.create(n + 1);
-	memory.writestring(src, 0, text);
-	const classes_buffer: buffer = calloc(n + 1);
+	const n: number = strlen(text);
+	local src_buffer: buffer = memory.create(n + 1);
+	memory.writestring(src_buffer, 0, text);
+	local classes_buffer: buffer = calloc(n + 1);
 	memory.writestring(classes_buffer, 0, (text:gsub("%a", "\1"):gsub("%d", "\2"):gsub(" ", "\4"):gsub("[^\1\2\4]", "\3")));
-	const tmp_buffer: buffer = calloc(n * 2);
-	const history: {[number]: number} = {};
+	local tmp_buffer: buffer = calloc(n * 2);
+	local history: {[number]: number} = {};
 	local i: number = 0;
 	while (i < n) do
 		local e: number = i;
@@ -84,7 +85,7 @@ const main = @[native, checked] function(data_buffer: buffer, prompt: string, co
 		end;
 		local len_uint32: number = e - i;
 		for k: number = 0, len_uint32 - 1 do
-			memory.writeu16(tmp_buffer, k * 2, memory.readu8(src, i + k));
+			memory.writeu16(tmp_buffer, k * 2, memory.readu8(src_buffer, i + k));
 		end;
 		while (true) do
 			local _z: number, _k: number = 0xFFFF, 0;
@@ -109,9 +110,9 @@ const main = @[native, checked] function(data_buffer: buffer, prompt: string, co
 		end;
 		i = e;
 	end;
-	const s: buffer = calloc(7424);
-	const kv: buffer = calloc(294912);
-	const out: {[number]: string} = malloc(count);
+	local s: buffer = calloc(7424);
+	local kv: buffer = calloc(294912);
+	local out: {[number]: string} = malloc(count);
 	local next_k: number = math.max(1, #history - 127);
 	local pos: number = 0;
 	while (true) do
@@ -226,7 +227,7 @@ const main = @[native, checked] function(data_buffer: buffer, prompt: string, co
 					end;
 				end;
 			end;
-			const tbl: {[number]: number} = table.create(1024);
+			local tbl: {[number]: number} = table.create(1024);
 			for i: number = 0, 1023 do
 				tbl[i + 1] = memory.readf32(s, 3328 + i * 4);
 			end;
